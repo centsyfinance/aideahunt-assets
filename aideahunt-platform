@@ -1,0 +1,664 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Plus, TrendingUp, Users, Star, MessageCircle, Filter, User, Settings, Trophy, Tag, Calendar, ArrowUp, ArrowDown, Eye, Heart, Share2, ExternalLink, Mail } from 'lucide-react';
+
+// Add custom styles for modern dropdowns
+const dropdownStyles = `
+  <style>
+    /* Override all select elements with white modern styling */
+    select, select:focus, select:hover, select:active {
+      background: white !important;
+      background-color: white !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+      background-position: right 12px center !important;
+      background-repeat: no-repeat !important;
+      background-size: 16px 16px !important;
+      border: 2px solid #e5e7eb !important;
+      border-radius: 12px !important;
+      color: #1f2937 !important;
+      font-weight: 500 !important;
+      padding: 12px 40px 12px 16px !important;
+      transition: all 0.2s ease !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+    }
+    
+    select:hover {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231d4ed8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    }
+    
+    select:focus {
+      outline: none !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    /* Style all option elements */
+    select option {
+      background: white !important;
+      background-color: white !important;
+      color: #1f2937 !important;
+      padding: 12px 16px !important;
+      border: none !important;
+      font-weight: 500 !important;
+    }
+    
+    select option:hover, select option:focus {
+      background: #f8fafc !important;
+      background-color: #f8fafc !important;
+      color: #3b82f6 !important;
+    }
+    
+    select option:checked, select option:selected {
+      background: #3b82f6 !important;
+      background-color: #3b82f6 !important;
+      color: white !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Remove any gradient backgrounds */
+    .bg-gradient-to-r {
+      background: white !important;
+      background-image: none !important;
+    }
+    
+    /* Target specific select elements */
+    select[class*="gradient"] {
+      background: white !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    }
+  </style>
+`;
+
+// Inject styles into document head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('div');
+  styleElement.innerHTML = dropdownStyles;
+  document.head.appendChild(styleElement);
+}
+
+// Mock data structure - replace with Firebase data
+const mockProjects = [
+  {
+    id: 1,
+    title: "VoiceClone AI",
+    creator: "Alex Chen",
+    creatorId: "user_1",
+    description: "Clone any voice with just 30 seconds of audio using advanced neural networks",
+    category: "Audio AI",
+    aiScore: 89,
+    submittedAt: new Date('2024-08-25'),
+    votes: 245,
+    comments: 18,
+    tags: ["voice", "clone", "audio", "neural"],
+    featured: true,
+    status: "live"
+  },
+  {
+    id: 2,
+    title: "CodeMentor GPT",
+    creator: "Sarah Kim",
+    creatorId: "user_2", 
+    description: "AI coding assistant that learns your style and provides personalized mentoring",
+    category: "Developer Tools",
+    aiScore: 92,
+    submittedAt: new Date('2024-08-24'),
+    votes: 312,
+    comments: 24,
+    tags: ["coding", "mentor", "developer", "gpt"],
+    featured: false,
+    status: "live"
+  },
+  {
+    id: 3,
+    title: "DreamCanvas",
+    creator: "Mike Torres",
+    creatorId: "user_3",
+    description: "Generate infinite canvas artwork from your dreams and thoughts",
+    category: "Creative AI",
+    aiScore: 76,
+    submittedAt: new Date('2024-08-23'),
+    votes: 156,
+    comments: 12,
+    tags: ["art", "creative", "canvas", "dreams"],
+    featured: false,
+    status: "live"
+  },
+  {
+    id: 4,
+    title: "PitchPerfect AI",
+    creator: "Emma Rodriguez",
+    creatorId: "user_4",
+    description: "AI that analyzes and improves your startup pitch in real-time",
+    category: "Business AI",
+    aiScore: 85,
+    submittedAt: new Date('2024-08-22'),
+    votes: 198,
+    comments: 31,
+    tags: ["pitch", "startup", "business", "analysis"],
+    featured: true,
+    status: "live"
+  },
+  {
+    id: 5,
+    title: "HealthScan Pro",
+    creator: "Dr. James Wilson",
+    creatorId: "user_5",
+    description: "AI-powered health scanning using smartphone camera for early detection",
+    category: "Health AI",
+    aiScore: 94,
+    submittedAt: new Date('2024-08-21'),
+    votes: 423,
+    comments: 67,
+    tags: ["health", "scan", "detection", "medical"],
+    featured: false,
+    status: "live"
+  },
+  {
+    id: 6,
+    title: "GameNPC Builder",
+    creator: "Ryan Park",
+    creatorId: "user_6",
+    description: "Create intelligent NPCs for games that learn and adapt to player behavior",
+    category: "Gaming AI",
+    aiScore: 78,
+    submittedAt: new Date('2024-08-20'),
+    votes: 134,
+    comments: 19,
+    tags: ["gaming", "npc", "behavior", "adaptive"],
+    featured: false,
+    status: "live"
+  }
+];
+
+const categories = [
+  "All Categories",
+  "Developer Tools", 
+  "Creative AI",
+  "Business AI",
+  "Health AI",
+  "Gaming AI",
+  "Audio AI",
+  "Video AI",
+  "Chatbots",
+  "Agents",
+  "Music AI",
+  "Education AI"
+];
+
+// Firebase integration points - replace with actual Firebase calls
+const FirebaseService = {
+  // Auth
+  getCurrentUser: () => null, // Replace with: firebase.auth().currentUser
+  signIn: (email, password) => Promise.resolve(), // Replace with Firebase auth
+  signUp: (email, password) => Promise.resolve(), // Replace with Firebase auth
+  signOut: () => Promise.resolve(), // Replace with Firebase auth
+  
+  // Firestore
+  getProjects: () => Promise.resolve(mockProjects), // Replace with Firestore query
+  submitProject: (projectData) => Promise.resolve(), // Replace with Firestore add
+  voteProject: (projectId, userId) => Promise.resolve(), // Replace with Firestore update
+  getLeaderboard: (timeframe) => Promise.resolve(mockProjects), // Replace with Firestore query
+  getUserProfile: (userId) => Promise.resolve({}), // Replace with Firestore get
+  updateUserProfile: (userId, data) => Promise.resolve(), // Replace with Firestore update
+  
+  // Stripe/Payment integration
+  processPayment: (amount, tier) => Promise.resolve(), // Replace with Stripe
+  createSubscription: (userId, tier) => Promise.resolve(), // Replace with Stripe
+  cancelSubscription: (subscriptionId) => Promise.resolve(), // Replace with Stripe
+  
+  // Investor features  
+  getInvestorProjects: () => Promise.resolve(mockProjects), // Curated feed
+  connectInvestorToCreator: (investorId, creatorId, projectId) => Promise.resolve(), // Intro system
+  recordIntroCommission: (amount, projectId) => Promise.resolve(), // Track commissions
+  
+  // AI Scoring
+  calculateAIScore: (projectData) => {
+    // This would call your AI scoring endpoint/function
+    // For now, returning mock score
+    return Promise.resolve(Math.floor(Math.random() * 40) + 60);
+  }
+};
+
+const AIdeaHunt = () => {
+  const [currentView, setCurrentView] = useState('hunt');
+  const [projects, setProjects] = useState(mockProjects);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('aiScore'); // aiScore, votes, recent
+  const [user, setUser] = useState(null);
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
+  const [leaderboardTimeframe, setLeaderboardTimeframe] = useState('week');
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showInvestorModal, setShowInvestorModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('signin'); // signin, signup, forgot
+
+  // Filtered and sorted projects
+  const filteredProjects = useMemo(() => {
+    let filtered = projects.filter(project => {
+      const matchesCategory = selectedCategory === 'All Categories' || project.category === selectedCategory;
+      const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+
+    // Sort projects
+    filtered.sort((a, b) => {
+      switch(sortBy) {
+        case 'aiScore':
+          return b.aiScore - a.aiScore;
+        case 'votes':
+          return b.votes - a.votes;
+        case 'recent':
+          return new Date(b.submittedAt) - new Date(a.submittedAt);
+        default:
+          return b.aiScore - a.aiScore;
+      }
+    });
+
+    return filtered;
+  }, [projects, selectedCategory, searchTerm, sortBy]);
+
+  // Navigation with back button
+  const BackButton = () => (
+    <button
+      onClick={() => setCurrentView('hunt')}
+      className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+      </svg>
+      <span>Back to Hunt Board</span>
+    </button>
+  );
+
+  // Auth Modal Component
+  const AuthModal = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [name, setName] = useState('');
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      // Handle auth logic here
+      if (authMode === 'signup' && password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+      // Firebase auth calls would go here
+      setShowAuthModal(false);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {authMode === 'signin' && 'Sign In'}
+              {authMode === 'signup' && 'Create Account'}
+              {authMode === 'forgot' && 'Reset Password'}
+            </h2>
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {authMode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {authMode !== 'forgot' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            )}
+
+            {authMode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-black to-cyan-600 text-white py-2 px-4 rounded-md hover:from-gray-900 hover:to-cyan-700 transition-colors"
+            >
+              {authMode === 'signin' && 'Sign In'}
+              {authMode === 'signup' && 'Create Account'}
+              {authMode === 'forgot' && 'Send Reset Link'}
+            </button>
+          </form>
+
+          <div className="mt-4 text-center">
+            {authMode === 'signin' && (
+              <>
+                <button
+                  onClick={() => setAuthMode('forgot')}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Forgot password?
+                </button>
+                <div className="mt-2">
+                  <span className="text-sm text-gray-600">Don't have an account? </span>
+                  <button
+                    onClick={() => setAuthMode('signup')}
+                    className="text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    Sign up
+                  </button>
+                </div>
+              </>
+            )}
+            {authMode === 'signup' && (
+              <div>
+                <span className="text-sm text-gray-600">Already have an account? </span>
+                <button
+                  onClick={() => setAuthMode('signin')}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Sign in
+                </button>
+              </div>
+            )}
+            {authMode === 'forgot' && (
+              <button
+                onClick={() => setAuthMode('signin')}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                Back to sign in
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // User Profile Page
+  const ProfilePage = () => (
+    <div className="max-h-screen overflow-y-auto">
+      <BackButton />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+          <p className="text-gray-600 mt-2">Manage your account settings and preferences</p>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-start space-x-6">
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                <User className="w-12 h-12 text-gray-400" />
+              </div>
+              <button className="mt-2 text-sm text-blue-600 hover:text-blue-800">Change Photo</button>
+            </div>
+            
+            <div className="flex-1 space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    defaultValue="John Doe"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    defaultValue="john@example.com"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <textarea
+                  rows={3}
+                  defaultValue="AI enthusiast and startup founder"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                  <input
+                    type="text"
+                    defaultValue="Tech Startup Inc"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <input
+                    type="text"
+                    defaultValue="London, UK"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex space-x-3">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                  Save Changes
+                </button>
+                <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Settings Page
+  const SettingsPage = () => (
+    <div className="max-h-screen overflow-y-auto">
+      <BackButton />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-gray-600 mt-2">Manage your preferences and account settings</p>
+        </div>
+        
+        <div className="grid gap-6">
+          {/* Notifications */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Notifications</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Email Notifications</h3>
+                  <p className="text-sm text-gray-600">Receive updates about your projects</p>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Investment Alerts</h3>
+                  <p className="text-sm text-gray-600">Get notified about investment opportunities</p>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+            </div>
+          </div>
+
+          {/* Privacy */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Privacy</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Profile Visibility</h3>
+                  <p className="text-sm text-gray-600">Make your profile visible to investors</p>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Show Email</h3>
+                  <p className="text-sm text-gray-600">Display email on your public profile</p>
+                </div>
+                <input type="checkbox" className="toggle" />
+              </div>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="bg-white rounded-lg border border-red-200 p-6">
+            <h2 className="text-lg font-semibold text-red-900 mb-4">Danger Zone</h2>
+            <div className="space-y-4">
+              <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                Delete Account
+              </button>
+              <p className="text-sm text-gray-600">This action cannot be undone</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // About Us Page
+  const AboutPage = () => (
+    <div className="max-h-screen overflow-y-auto">
+      <BackButton />
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">About AIdeaHunt</h1>
+          <p className="text-gray-600 mt-2">Where tomorrow's billion-pound AI ideas go to be discovered</p>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-8">
+          <div className="prose max-w-none">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Mission</h2>
+            <p className="text-gray-700 mb-6">
+              AIdeaHunt is the world's first AI-powered discovery platform where users can explore, rank, and support new tools, apps, and platforms built using artificial intelligence. We use our own AI system to evaluate the potential of each project and display a success prediction score, allowing anyone — from investors to casual tech lovers — to back promising AI builds early.
+            </p>
+
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">What Makes Us Different</h2>
+            <ul className="space-y-2 text-gray-700 mb-6">
+              <li>• AI-powered potential prediction — not just human votes</li>
+              <li>• Built for builders — indie friendly, zero gatekeeping</li>
+              <li>• Designed for virality — leaderboards, share buttons, hype</li>
+              <li>• Backing system — perfect bridge between ideas & funders</li>
+              <li>• All-in-one discovery + data + exposure tool for the AI era</li>
+            </ul>
+
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Vision</h2>
+            <p className="text-gray-700">
+              We believe AI is driving the biggest wave of technology change we've ever seen. Our platform helps surface the most promising innovations before they become mainstream, creating value for creators, investors, and the broader AI community.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Contact Page
+  const ContactPage = () => (
+    <div className="max-h-screen overflow-y-auto">
+      <BackButton />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Contact Us</h1>
+          <p className="text-gray-600 mt-2">Get in touch with our team</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Send us a message</h2>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <textarea
+                  rows={5}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Send Message
+              </button>
+            </form>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Get in touch</h2>
+              <div className="space-y-3">
+                <div>
+                  <h3 className="font-medium text-gray-900">Email</h3>
+                  <p className="text-gray-600">hello@aideahunt.com</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Support</h
